@@ -56,11 +56,12 @@ module "s3_bucket" {
   version = "3.3.0"
 
   bucket = local.bucket_name
-  acl    = "log-delivery-write" #private public-read public-read-write authenticated-read aws-exec-read log-delivery-write
+  acl    = "private"
 
   versioning = {
     enabled = true
   }
+  
 
   replication_configuration = {
     role = aws_iam_role.replication.arn
@@ -70,6 +71,10 @@ module "s3_bucket" {
         id       = "something-with-kms-and-filter"
         status   = true
         priority = 10
+
+        existing_object_replication {
+          status = "Enabled
+        }
 
         delete_marker_replication = false
 
@@ -83,7 +88,7 @@ module "s3_bucket" {
         }
 
         filter = {
-          prefix = "one"
+          prefix = ""
           tags = {
             ReplicateMe = "Yes"
           }
@@ -109,51 +114,6 @@ module "s3_bucket" {
             status  = "Enabled"
             minutes = 15
           }
-        }
-      },
-      {
-        id       = "something-with-filter"
-        priority = 20
-
-        delete_marker_replication = false
-
-        filter = {
-          prefix = "two"
-          tags = {
-            ReplicateMe = "Yes"
-          }
-        }
-
-        destination = {
-          bucket        = "arn:aws:s3:::${local.destination_bucket_name}"
-          storage_class = "STANDARD"
-        }
-      },
-      {
-        id       = "everything-with-filter"
-        status   = "Enabled"
-        priority = 30
-
-        delete_marker_replication = true
-
-        filter = {
-          prefix = ""
-        }
-
-        destination = {
-          bucket        = "arn:aws:s3:::${local.destination_bucket_name}"
-          storage_class = "STANDARD"
-        }
-      },
-      {
-        id     = "everything-without-filters"
-        status = "Enabled"
-
-        delete_marker_replication = true
-
-        destination = {
-          bucket        = "arn:aws:s3:::${local.destination_bucket_name}"
-          storage_class = "STANDARD"
         }
       },
     ]
